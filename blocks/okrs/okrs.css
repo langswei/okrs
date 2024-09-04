@@ -78,6 +78,7 @@ div.section.okrs-container p {
 .progressborder {
     border: 1px solid #ccc;
     margin-bottom: 8px;
+    overflow: clip;
 }
 
 .progressbar {
