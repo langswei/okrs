@@ -62,7 +62,7 @@ div.section.okrs-container p {
 
 .container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     font-size: var(--body-font-size-xs);
 }
 
