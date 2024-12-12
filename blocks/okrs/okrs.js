@@ -62,9 +62,10 @@ export default async function decorate(block) {
               <option value=''>--Select One--</option>
       `;
 
+    // output Categories
     // TODO replace hardcoded categories with dynamic values from sheet
     // also need to change on the fly, so use onchange event
-    output += `<option value='tempcategory'>Temp Category</option>`;
+   // output += `<option value='tempcategory'>Temp Category</option>`;
 
     output += `
             </select>
@@ -91,6 +92,7 @@ export default async function decorate(block) {
         </div>
         <div id='results'></div>
     `;
+
 
     data.OKRs.data.forEach((element) => {
       // prepare subset of metrics data for the current objective in the loop
@@ -156,7 +158,33 @@ export default async function decorate(block) {
     block.querySelector('#showform').addEventListener('click', () => {
       block.querySelector('#showform').classList.add('hide');
       block.querySelector('#addform').classList.remove('hide');
+      block.querySelector('label[for=category]').classList.add('hide');
+      block.querySelector('#category').classList.add('hide');
     });
+
+ 
+    // handle creation options.  added as new function in case form needs to expand.
+    function createOptions( obj, value, dataElem ){
+      obj.options.length = 1;
+      data.Categories.data.forEach((element) => {
+        if (element.Objective === value) {
+          var options = document.createElement('option');
+          options.value = options.text =element[dataElem];
+          block.querySelector('label[for='+ dataElem.toLowerCase()+']').classList.remove('hide');
+          obj.classList.remove('hide');
+          obj.add(options);
+        }
+      });
+    };
+
+    block.querySelector('#objective').addEventListener("change", function() {
+      const value = this.value;
+      const cat = block.querySelector('#category');
+      const dataElem = "Category";
+      createOptions(cat, value, dataElem);
+    });
+  
+ 
 
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
