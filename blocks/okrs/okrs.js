@@ -29,7 +29,7 @@ export default async function decorate(block) {
   });
 
   // retrieve OKR data
-  const okrs = new URL(`${window.location.protocol}//${window.location.host}/okrs.json?sheet=OKRs&sheet=Metrics&sheet=Team`);
+  const okrs = new URL(`${window.location.protocol}//${window.location.host}/okrs.json?sheet=OKRs&sheet=Categories&sheet=Metrics&sheet=Team`);
 
   fetch(okrs, {
     method: 'GET',
@@ -54,6 +54,17 @@ export default async function decorate(block) {
     data.OKRs.data.forEach((element) => {
       output += `<option value='${element.Objective}'>${element.Objective}</option>`;
     });
+
+    output += `
+            </select>
+            <label for='category'>* Category</label>
+            <select id='category' name='category'>
+              <option value=''>--Select One--</option>
+      `;
+
+    // TODO replace hardcoded categories with dynamic values from sheet
+    // also need to change on the fly, so use onchange event
+    output += `<option value='tempcategory'>Temp Category</option>`;
 
     output += `
             </select>
@@ -87,6 +98,7 @@ export default async function decorate(block) {
       data.Metrics.data.forEach((metric) => {
         if (element.Objective === metric.Objective) {
           const obj = {};
+          obj.Catgegory = metric.Category;
           obj.Who = metric.Who;
           obj.Date = metric.Date;
           obj.Summary = metric.Summary;
@@ -155,6 +167,7 @@ export default async function decorate(block) {
       // field validation
 
       const objective = block.querySelector('#objective').value;
+      const category = block.querySelector('#category').value;
       const who = block.querySelector('#who').value;
       const date = block.querySelector('#date').value;
       const summary = block.querySelector('#summary').value;
@@ -167,6 +180,7 @@ export default async function decorate(block) {
         block.querySelector('#add').classList.add('hide');
         block.querySelector('#cancel').classList.add('hide');
         block.querySelector('#objective').disabled = 'disabled';
+        block.querySelector('#category').disabled = 'disabled';
         block.querySelector('#who').disabled = 'disabled';
         block.querySelector('#date').disabled = 'disabled';
         block.querySelector('#summary').disabled = 'disabled';
@@ -178,6 +192,7 @@ export default async function decorate(block) {
         const body = {
           data: {
             Objective: objective,
+            Category: category,
             Who: who,
             Date: date,
             Summary: summary,
