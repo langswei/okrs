@@ -1,17 +1,24 @@
 /* eslint-disable no-console */
-// import { readBlockConfig } from '../../scripts/aem.js';
+import { readBlockConfig } from '../../scripts/aem.js';
 
 /**
  * loads and decorates the footer
  * @param {Element} block The footer block element
  */
 export default async function decorate(block) {
-  // const cfg = readBlockConfig(block);
+  const cfg = readBlockConfig(block);
+
+  // get sheet from block config
+  let sheet = cfg.source;
+  if (sheet == '') {
+    sheet = '/okrs';
+  }
+  
   block.innerHTML = '';
 
   // preview the sheet so the latest data is accessible
   // wait for the preview to complete before proceeding to fetch the data
-  const preview = new URL('https://admin.hlx.page/preview/langswei/okrs/main/okrs.json');
+  const preview = new URL(`https://admin.hlx.page/preview/langswei/okrs/main${sheet}.json`);
   await fetch(preview, {
     method: 'POST',
     headers: {
@@ -29,7 +36,7 @@ export default async function decorate(block) {
   });
 
   // retrieve OKR data
-  const okrs = new URL(`${window.location.protocol}//${window.location.host}/okrs.json?sheet=OKRs&sheet=Categories&sheet=Metrics&sheet=Team`);
+  const okrs = new URL(`${window.location.protocol}//${window.location.host}${sheet}.json?sheet=OKRs&sheet=Categories&sheet=Metrics&sheet=Team`);
 
   fetch(okrs, {
     method: 'GET',
@@ -60,14 +67,6 @@ export default async function decorate(block) {
             <label for='category' class='hide'>* Category</label>
             <select id='category' name='category' class='hide'>
               <option value=''>--Select One--</option>
-      `;
-
-    // output Categories
-    // TODO replace hardcoded categories with dynamic values from sheet
-    // also need to change on the fly, so use onchange event
-   // output += `<option value='tempcategory'>Temp Category</option>`;
-
-    output += `
             </select>
             <label for='who'>* Who</label>
             <select id='who' name='who'>
@@ -92,7 +91,6 @@ export default async function decorate(block) {
         </div>
         <div id='results'></div>
     `;
-
 
     data.OKRs.data.forEach((element) => {
       // prepare subset of metrics data for the current objective in the loop
@@ -155,7 +153,7 @@ export default async function decorate(block) {
     block.innerHTML = output;
 
     // handle form dynamic options.  added as new function in case form needs to expand.
-    function createOptions( obj, value, elem ){
+    function createOptions(obj, value, elem) {
       obj.options.length = 1;
       data.Categories.data.forEach((element) => {
         if (element.Objective === value) {
@@ -180,7 +178,6 @@ export default async function decorate(block) {
       createOptions(cat, value, elem);
     });
   
-
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
       block.querySelector('#showform').classList.remove('hide');
@@ -188,7 +185,6 @@ export default async function decorate(block) {
 
     block.querySelector('#add').addEventListener('click', () => {
       // field validation
-
       const objective = block.querySelector('#objective').value;
       const category = block.querySelector('#category').value;
       const who = block.querySelector('#who').value;
@@ -211,7 +207,7 @@ export default async function decorate(block) {
         block.querySelector('#results').innerHTML = 'Saving...';
 
         // create new domain key by making API request
-        const endpoint = new URL(`${window.location.protocol}//${window.location.host}/okrs`);
+        const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
         const body = {
           data: {
             Objective: objective,
