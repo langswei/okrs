@@ -145,11 +145,11 @@ export default async function decorate(block) {
 
         // display metrics data
         Object.values(metric).forEach((value) => {
-          if (value) {
+          //if (value) {
             output += `<div class='item${row}'>${value}</div>`;
-          } else {
-            output += `<div class='item${row}'>&nbsp;</div>`;
-          }
+          //} else {
+          //  output += `<div class='item${row}'>&nbsp;</div>`;
+          //}
         });
       });
       output += '</div>';
