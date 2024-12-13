@@ -48,11 +48,9 @@ export default async function decorate(block) {
 
     // default date format yyyy-mm-dd
     const today = new Date().toISOString().split('T')[0];
-console.log('add button0');
+
     if (cfg.readonly != 'true') {
-      console.log('add button1');
-      ouput += `<button id='showform'>Add</button>`;
-      console.log('add button2');
+      output += `<button id='showform'>Add</button>`;
     }
 
     output += `
