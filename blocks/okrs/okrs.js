@@ -101,7 +101,7 @@ export default async function decorate(block) {
       data.Metrics.data.forEach((metric) => {
         if (element.Objective === metric.Objective) {
           const obj = {};
-          obj.Catgegory = metric.Category;
+          obj.Category = metric.Category;
           obj.Who = metric.Who;
           obj.Date = metric.Date;
           obj.Summary = metric.Summary;
