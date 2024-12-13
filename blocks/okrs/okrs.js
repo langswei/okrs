@@ -243,7 +243,8 @@ export default async function decorate(block) {
         });
       }
     });
-  }).catch(() => {
+  }).catch((error) => {
+    console.log(error);
     block.querySelector('#results').innerHTML = 'Error retrieving OKR data.';
   });
 }
