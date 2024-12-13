@@ -51,6 +51,7 @@ export default async function decorate(block) {
 
     if (cfg.readonly != 'true') {
       ouput += `<button id='showform'>Add</button>`;
+      console.log('add button');
     }
 
     output += `
