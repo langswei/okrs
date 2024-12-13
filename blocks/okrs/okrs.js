@@ -57,8 +57,8 @@ export default async function decorate(block) {
 
     output += `
             </select>
-            <label for='category'>* Category</label>
-            <select id='category' name='category'>
+            <label for='category' class='hide'>* Category</label>
+            <select id='category' name='category' class='hide'>
               <option value=''>--Select One--</option>
       `;
 
@@ -154,37 +154,32 @@ export default async function decorate(block) {
 
     block.innerHTML = output;
 
-    // attach events
-    block.querySelector('#showform').addEventListener('click', () => {
-      block.querySelector('#showform').classList.add('hide');
-      block.querySelector('#addform').classList.remove('hide');
-      block.querySelector('label[for=category]').classList.add('hide');
-      block.querySelector('#category').classList.add('hide');
-    });
-
- 
-    // handle creation options.  added as new function in case form needs to expand.
-    function createOptions( obj, value, dataElem ){
+    // handle form dynamic options.  added as new function in case form needs to expand.
+    function createOptions( obj, value, elem ){
       obj.options.length = 1;
       data.Categories.data.forEach((element) => {
         if (element.Objective === value) {
           var options = document.createElement('option');
-          options.value = options.text =element[dataElem];
-          block.querySelector('label[for='+ dataElem.toLowerCase()+']').classList.remove('hide');
-          obj.classList.remove('hide');
+          options.value = options.text =element[elem];
           obj.add(options);
         }
       });
+      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide'); 
     };
 
+    // attach events
+    block.querySelector('#showform').addEventListener('click', () => {
+      block.querySelector('#showform').classList.add('hide');
+      block.querySelector('#addform').classList.remove('hide');
+    });
+
     block.querySelector('#objective').addEventListener("change", function() {
+      const elem = "Category";
       const value = this.value;
-      const cat = block.querySelector('#category');
-      const dataElem = "Category";
-      createOptions(cat, value, dataElem);
+      const cat = block.querySelector(`#${elem.toLowerCase()}`);
+      createOptions(cat, value, elem);
     });
   
- 
 
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
