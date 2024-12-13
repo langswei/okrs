@@ -49,8 +49,11 @@ export default async function decorate(block) {
     // default date format yyyy-mm-dd
     const today = new Date().toISOString().split('T')[0];
 
+    if (cfg.readonly != 'true') {
+      ouput += `<button id='showform'>Add</button>`;
+    }
+
     output += `
-        <button id='showform'>Add</button>
         <div id='addform' class='content hide'>
             <label for='objective'>* Objective</label>
             <select id='objective' name='objective'>
@@ -142,7 +145,11 @@ export default async function decorate(block) {
 
         // display metrics data
         Object.values(metric).forEach((value) => {
-          output += `<div class='item${row}'>${value}</div>`;
+          if (value) {
+            output += `<div class='item${row}'>${value}</div>`;
+          } else {
+            output += `<div class='item${row}'>&nbsp;</div>`;
+          }
         });
       });
       output += '</div>';
