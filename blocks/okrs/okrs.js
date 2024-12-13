@@ -145,11 +145,11 @@ export default async function decorate(block) {
 
         // display metrics data
         Object.values(metric).forEach((value) => {
-          //if (value) {
+          if (value) {
             output += `<div class='item${row}'>${value}</div>`;
-          //} else {
-          //  output += `<div class='item${row}'>&nbsp;</div>`;
-          //}
+          } else {
+            output += `<div class='item${row}'>&nbsp;</div>`;
+          }
         });
       });
       output += '</div>';
@@ -173,10 +173,12 @@ export default async function decorate(block) {
     };
 
     // attach events
-    block.querySelector('#showform').addEventListener('click', () => {
-      block.querySelector('#showform').classList.add('hide');
-      block.querySelector('#addform').classList.remove('hide');
-    });
+    if (cfg.readonly != 'true') {
+      block.querySelector('#showform').addEventListener('click', () => {
+        block.querySelector('#showform').classList.add('hide');
+        block.querySelector('#addform').classList.remove('hide');
+      });
+    }
 
     block.querySelector('#objective').addEventListener("change", function() {
       const elem = "Category";
