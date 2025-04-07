@@ -13,7 +13,7 @@ export default async function decorate(block) {
   if (sheet == '') {
     sheet = '/okrs';
   }
-  
+
   block.innerHTML = '';
 
   // preview the sheet so the latest data is accessible
@@ -169,7 +169,7 @@ export default async function decorate(block) {
           obj.add(options);
         }
       });
-      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide'); 
+      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide');
     };
 
     // attach events
@@ -186,7 +186,7 @@ export default async function decorate(block) {
       const cat = block.querySelector(`#${elem.toLowerCase()}`);
       createOptions(cat, value, elem);
     });
-  
+
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
       block.querySelector('#showform').classList.remove('hide');
@@ -216,7 +216,8 @@ export default async function decorate(block) {
         block.querySelector('#results').innerHTML = 'Saving...';
 
         // create new domain key by making API request
-        const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
+        // const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
+        const endpoint = new URL(`https://form.aem.page/cashub--okrs--langswei/${sheet}`);
         const body = {
           data: {
             Objective: objective,
