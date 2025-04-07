@@ -217,7 +217,7 @@ export default async function decorate(block) {
 
         // create new domain key by making API request
         // const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
-        const endpoint = new URL(`https://form.aem.page/cashub--okrs--langswei/${sheet}`);
+        const endpoint = new URL(`https://form.aem.page/cashub--okrs--langswei${sheet}`);
         const body = {
           data: {
             Objective: objective,
