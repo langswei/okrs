@@ -10,7 +10,7 @@ export default async function decorate(block) {
 
   // get sheet from block config
   let sheet = cfg.source;
-  if (sheet == '') {
+  if (sheet === '') {
     sheet = '/okrs';
   }
 
@@ -49,8 +49,8 @@ export default async function decorate(block) {
     // default date format yyyy-mm-dd
     const today = new Date().toISOString().split('T')[0];
 
-    if (cfg.readonly != 'true') {
-      output += `<button id='showform'>Add</button>`;
+    if (cfg.readonly !== 'true') {
+      output += '<button id=\'showform\'>Add</button>';
     }
 
     output += `
@@ -164,8 +164,8 @@ export default async function decorate(block) {
       obj.options.length = 1;
       data.Categories.data.forEach((element) => {
         if (element.Objective === value) {
-          var options = document.createElement('option');
-          options.value = options.text =element[elem];
+          const options = document.createElement('option');
+          options.value = options.text = element[elem];
           obj.add(options);
         }
       });
@@ -173,16 +173,16 @@ export default async function decorate(block) {
     };
 
     // attach events
-    if (cfg.readonly != 'true') {
+    if (cfg.readonly !== 'true') {
       block.querySelector('#showform').addEventListener('click', () => {
         block.querySelector('#showform').classList.add('hide');
         block.querySelector('#addform').classList.remove('hide');
       });
     }
 
-    block.querySelector('#objective').addEventListener("change", function() {
-      const elem = "Category";
-      const value = this.value;
+    block.querySelector('#objective').addEventListener('change', () => {
+      const elem = 'Category';
+      const { value } = this;
       const cat = block.querySelector(`#${elem.toLowerCase()}`);
       createOptions(cat, value, elem);
     });
