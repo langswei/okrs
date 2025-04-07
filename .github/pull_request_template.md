@@ -4,4 +4,4 @@ Fix #<gh-issue-id>
 
 Test URLs:
 - Before: https://cashub--okrs--langswei.aem.page/
-- After: https://formfix--okrs}--langswei.aem.page/
+- After: https://{branch}--okrs--langswei.aem.page/
