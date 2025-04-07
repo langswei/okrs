@@ -1,12 +1,22 @@
 /* eslint-disable no-console */
 import { readBlockConfig } from '../../scripts/aem.js';
 
+function getCookieValue(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
 /**
  * loads and decorates the footer
  * @param {Element} block The footer block element
  */
 export default async function decorate(block) {
   const cfg = readBlockConfig(block);
+
+  const authToken = getCookieValue('hlx-auth-token');
+  console.log(authToken);
 
   // get sheet from block config
   let sheet = cfg.source;
