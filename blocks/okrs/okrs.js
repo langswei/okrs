@@ -15,9 +15,6 @@ function getCookieValue(name) {
 export default async function decorate(block) {
   const cfg = readBlockConfig(block);
 
-  const authToken = getCookieValue('hlx-auth-token');
-  console.log(authToken);
-
   // get sheet from block config
   let sheet = cfg.source;
   if (sheet === '') {
@@ -239,11 +236,14 @@ export default async function decorate(block) {
           },
         };
 
+        const authToken = 'hlxtst_eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJva3JzLS1sYW5nc3dlaS5hZW0ucGFnZSIsInN1YiI6ImRrdW50emVAYWRvYmUuY29tIiwiZXhwIjoxNzQ0MTQ4MDY0fQ.fUj-lD5Sz5KMDpiMaoK7mnwrmvCFCVV8ZdCdrn5U_4SrTOqcO9CX70bsas1OuL7WZackHsT2GSUhaSciN2rh0bLSXr1JUdLT4ujUJ90CWmnrTi5yhmr9qysAncLKv1Fu7aOjGvUpiqhdlYTOP5CMfu__sfoDluyTcUdtyfyb0OxVdgi4_v_rMAeoyx3p_Y66Bd1hBvOigjGU9A6robd5e72DQTAwgbHDEO-yWOOHxv4wMlzHo1bSHZEP3ELPDA2V5ynKAKuY4ndENSNsqANgDw34izYWWHO7AjlMAtHwPjal8aCrWQPxqeJT2Dc_mve6NKRfc2LZX7BQzIv57Enjzg';
+
         fetch(endpoint, {
           method: 'POST',
           body: JSON.stringify(body),
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `token ${authToken}`,
           },
         }).then((response) => {
           if (response.status === 201) {
