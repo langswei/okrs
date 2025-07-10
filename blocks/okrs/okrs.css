@@ -61,9 +61,24 @@ div.section.okrs-container p {
 }
 
 .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     font-size: var(--body-font-size-xs);
+}
+
+.header-row,
+.row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.header,
+.item {
+  flex: 1;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .header {
@@ -86,4 +101,22 @@ div.section.okrs-container p {
     height: 32px;
     background-color: #4CAF50;
     font-size: var(--body-font-size-xs);
+}
+
+.collapsed-text {
+  max-height: 3.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-line;
+}
+
+.dots-toggle {
+  background: #b19393;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 4px;
+  cursor: pointer;
+  font-size: 0.75em;
+  color: #ffffff;
 }
