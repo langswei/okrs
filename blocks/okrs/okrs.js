@@ -126,6 +126,9 @@ export default async function decorate(block) {
       let headerDrawn = false;
       let i = 0;
       let row = '';
+      objArray.sort((a, b) => {
+        return a.Date < b.Date ? -1 : 1;
+      })
       objArray.forEach((metric) => {
         // only draw header row once
         if (!headerDrawn) {
