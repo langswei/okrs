@@ -143,20 +143,28 @@ export default async function decorate(block) {
         const rowClass = i % 2 === 0 ? 'even' : 'odd';
         output += `<div class="row ${rowClass}">`;
 
-      Object.values(metric).forEach((value, idx) => {
-        if (value) {
-          let content = value.toString();
+        Object.values(metric).forEach((value, idx) => {
+          if (!value) {
+            output += `<div class="item">&nbsp;</div>`;
+            return;
+          }
 
-          // Replace all URLs with "Link to Work"
+          let raw = value.toString();
           const urlRegex = /(https?:\/\/[^\s]+)/g;
-          content = content.replace(urlRegex, (url) => {
-            return `<a href="${url}" target="_blank" rel="noopener noreferrer">Link to Work</a>`;
-          });
 
-          // Determine if content is long enough to collapse
-          const isLong = content.length > 200 || content.includes('\n');
+          // Extract URLs for later replacement and length trimming
+          const urls = raw.match(urlRegex) || [];
+          const textOnly = raw.replace(urlRegex, '').trim();
+
+          // Replace URLs with "Link to Work<br>"
+          const content = raw.replace(urlRegex, (url) =>
+            `<a href="${url}" target="_blank" rel="noopener noreferrer">Link to Work</a><br>`
+          );
+
+          const isLong = textOnly.length > 200 || textOnly.includes('\n');
+          const safeId = `expand-${Math.random().toString(36).substring(2, 9)}-${idx}`;
+
           if (isLong) {
-            const safeId = `expand-${Math.random().toString(36).substring(2, 9)}-${idx}`;
             output += `
               <div class="item">
                 <div id="${safeId}" class="collapsed-text">${content}</div>
@@ -164,16 +172,13 @@ export default async function decorate(block) {
                   const el = document.getElementById('${safeId}');
                   const btn = this;
                   const expanded = el.classList.toggle('collapsed-text');
-                  btn.textContent = expanded ? '...' : '↑';
-                ">...</button>
+                  btn.textContent = expanded ? '.....' : '-collapse-';
+                ">.....</button>
               </div>`;
           } else {
             output += `<div class="item">${content}</div>`;
           }
-        } else {
-          output += `<div class="item">&nbsp;</div>`;
-        }
-      });
+        });
 
         output += `</div>`;
         i += 1;
