@@ -95,20 +95,21 @@ export default async function decorate(block) {
         <div id='results'></div>
     `;
 
+    const objContainer = {}
+
+    data.Metrics.data.forEach((metric) => {
+      const obj = {};
+      obj.Category = metric.Category;
+      obj.Who = metric.Who;
+      obj.Date = metric.Date;
+      obj.Summary = metric.Summary;
+      obj.Notes = metric.Notes;
+      Object.hasOwn(objContainer, metric.Objective) ? objContainer[metric.Objective].push(obj) : objContainer[metric.Objective] = [];
+    });
+
     data.OKRs.data.forEach((element) => {
       // prepare subset of metrics data for the current objective in the loop
-      const objArray = [];
-      data.Metrics.data.forEach((metric) => {
-        if (element.Objective === metric.Objective) {
-          const obj = {};
-          obj.Category = metric.Category;
-          obj.Who = metric.Who;
-          obj.Date = metric.Date;
-          obj.Summary = metric.Summary;
-          obj.Notes = metric.Notes;
-          objArray.push(obj);
-        }
-      });
+      const objArray = objContainer[element.Objective];
 
       // objective header
       const percent = (objArray.length * 100) / element['FY24 Target'];
@@ -125,32 +126,62 @@ export default async function decorate(block) {
       output += '<div class=container>';
       let headerDrawn = false;
       let i = 0;
-      let row = '';
+      objArray.sort((a, b) => {
+        return a.Date < b.Date ? -1 : 1;
+      });
       objArray.forEach((metric) => {
         // only draw header row once
         if (!headerDrawn) {
+          output += `<div class="row header-row">`;
           Object.keys(metric).forEach((field) => {
-            output += `<div class=header>${field}</div>`;
+            output += `<div class="header">${field}</div>`;
           });
+          output += `</div>`;
           headerDrawn = true;
         }
 
-        // used for table highlights
-        if (i % 2 === 0) {
-          row = '';
-        } else {
-          row = ' odd';
-        }
-        i += 1;
+        const rowClass = i % 2 === 0 ? 'even' : 'odd';
+        output += `<div class="row ${rowClass}">`;
 
-        // display metrics data
-        Object.values(metric).forEach((value) => {
-          if (value) {
-            output += `<div class='item${row}'>${value}</div>`;
+        Object.values(metric).forEach((value, idx) => {
+          if (!value) {
+            output += `<div class="item">&nbsp;</div>`;
+            return;
+          }
+
+          let raw = value.toString();
+          const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+          // Extract URLs for later replacement and length trimming
+          const urls = raw.match(urlRegex) || [];
+          const textOnly = raw.replace(urlRegex, '').trim();
+
+          // Replace URLs with "Link to Work<br>"
+          const content = raw.replace(urlRegex, (url) =>
+            `<a href="${url}" target="_blank" rel="noopener noreferrer">Link to Work</a><br>`
+          );
+
+          const isLong = textOnly.length > 200 || textOnly.includes('\n');
+          const safeId = `expand-${Math.random().toString(36).substring(2, 9)}-${idx}`;
+
+          if (isLong) {
+            output += `
+              <div class="item">
+                <div id="${safeId}" class="collapsed-text">${content}</div>
+                <button class="dots-toggle" onclick="
+                  const el = document.getElementById('${safeId}');
+                  const btn = this;
+                  const expanded = el.classList.toggle('collapsed-text');
+                  btn.textContent = expanded ? '.....' : '-collapse-';
+                ">.....</button>
+              </div>`;
           } else {
-            output += `<div class='item${row}'>&nbsp;</div>`;
+            output += `<div class="item">${content}</div>`;
           }
         });
+
+        output += `</div>`;
+        i += 1;
       });
       output += '</div>';
     });
