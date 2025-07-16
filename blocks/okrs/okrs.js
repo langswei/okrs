@@ -109,7 +109,11 @@ export default async function decorate(block) {
 
     data.OKRs.data.forEach((element) => {
       // prepare subset of metrics data for the current objective in the loop
-      const objArray = objContainer[element.Objective];
+      let objArray = objContainer[element.Objective];
+
+      if(!objArray){
+        objArray = [];
+      }
 
       // objective header
       const percent = (objArray.length * 100) / element['FY24 Target'];
