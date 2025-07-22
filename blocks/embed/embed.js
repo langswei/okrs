@@ -42,7 +42,8 @@ const youtube = (element) => {
 
 const iframe = (element) => {
   const url = new URL(element.href);
-  const html = `<div style="position: relative; padding-bottom: 56.25%;">
+  const html = `<button id='showform'>Add</button>
+    <div style="position: relative; padding-bottom: 56.25%;" id="embedform" class="hide">
       <iframe
         src="${url.href}"
         style="position: absolute; width: 100%; height: 100%; border: 0;"
@@ -79,6 +80,10 @@ export default function decorate(block) {
   } else {
     initObserver(() => {
       iframe(a);
+      block.querySelector('#showform').addEventListener('click', () => {
+        block.querySelector('#showform').classList.add('hide');
+        block.querySelector('#embedform').classList.remove('hide');
+      });
     }).observe(a);
   }
 }
