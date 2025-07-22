@@ -43,7 +43,7 @@ const youtube = (element) => {
 const iframe = (element) => {
   const url = new URL(element.href);
   const html = `<button id='showform'>Add</button>
-    <div style="position: relative; padding-bottom: 56.25%;" id="embedform" class="hide">
+    <div style="position: relative; padding-bottom: 50%;" id="embedform" class="hide">
       <iframe
         src="${url.href}"
         style="position: absolute; width: 100%; height: 100%; border: 0;"
