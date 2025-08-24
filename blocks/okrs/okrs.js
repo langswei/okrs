@@ -1,6 +1,13 @@
 /* eslint-disable no-console */
 import { readBlockConfig } from '../../scripts/aem.js';
 
+function getCookieValue(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
 /**
  * loads and decorates the footer
  * @param {Element} block The footer block element
@@ -10,10 +17,10 @@ export default async function decorate(block) {
 
   // get sheet from block config
   let sheet = cfg.source;
-  if (sheet == '') {
+  if (sheet === '') {
     sheet = '/okrs';
   }
-  
+
   block.innerHTML = '';
 
   // preview the sheet so the latest data is accessible
@@ -49,8 +56,8 @@ export default async function decorate(block) {
     // default date format yyyy-mm-dd
     const today = new Date().toISOString().split('T')[0];
 
-    if (cfg.readonly != 'true') {
-      output += `<button id='showform'>Add</button>`;
+    if (cfg.readonly !== 'true') {
+      output += '<button id=\'showform\'>Add</button>';
     }
 
     output += `
@@ -199,29 +206,29 @@ export default async function decorate(block) {
       obj.options.length = 1;
       data.Categories.data.forEach((element) => {
         if (element.Objective === value) {
-          var options = document.createElement('option');
-          options.value = options.text =element[elem];
+          const options = document.createElement('option');
+          options.value = options.text = element[elem];
           obj.add(options);
         }
       });
-      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide'); 
+      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide');
     };
 
     // attach events
-    if (cfg.readonly != 'true') {
+    if (cfg.readonly !== 'true') {
       block.querySelector('#showform').addEventListener('click', () => {
         block.querySelector('#showform').classList.add('hide');
         block.querySelector('#addform').classList.remove('hide');
       });
     }
 
-    block.querySelector('#objective').addEventListener("change", function() {
-      const elem = "Category";
-      const value = this.value;
+    block.querySelector('#objective').addEventListener('change', () => {
+      const elem = 'Category';
+      const { value } = this;
       const cat = block.querySelector(`#${elem.toLowerCase()}`);
       createOptions(cat, value, elem);
     });
-  
+
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
       block.querySelector('#showform').classList.remove('hide');
@@ -251,7 +258,8 @@ export default async function decorate(block) {
         block.querySelector('#results').innerHTML = 'Saving...';
 
         // create new domain key by making API request
-        const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
+        // const endpoint = new URL(`${window.location.protocol}//${window.location.host}${sheet}`);
+        const endpoint = new URL(`https://form.aem.page/main--okrs--langswei${sheet}`);
         const body = {
           data: {
             Objective: objective,
@@ -263,11 +271,14 @@ export default async function decorate(block) {
           },
         };
 
+        const authToken = 'hlxtst_eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJva3JzLS1sYW5nc3dlaS5hZW0ucGFnZSIsInN1YiI6ImRrdW50emVAYWRvYmUuY29tIiwiZXhwIjoxNzQ0MTQ4MDY0fQ.fUj-lD5Sz5KMDpiMaoK7mnwrmvCFCVV8ZdCdrn5U_4SrTOqcO9CX70bsas1OuL7WZackHsT2GSUhaSciN2rh0bLSXr1JUdLT4ujUJ90CWmnrTi5yhmr9qysAncLKv1Fu7aOjGvUpiqhdlYTOP5CMfu__sfoDluyTcUdtyfyb0OxVdgi4_v_rMAeoyx3p_Y66Bd1hBvOigjGU9A6robd5e72DQTAwgbHDEO-yWOOHxv4wMlzHo1bSHZEP3ELPDA2V5ynKAKuY4ndENSNsqANgDw34izYWWHO7AjlMAtHwPjal8aCrWQPxqeJT2Dc_mve6NKRfc2LZX7BQzIv57Enjzg';
+
         fetch(endpoint, {
           method: 'POST',
           body: JSON.stringify(body),
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `token ${authToken}`,
           },
         }).then((response) => {
           if (response.status === 201) {
