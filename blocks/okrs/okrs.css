@@ -40,6 +40,66 @@ div.section.okrs-container p {
     font-size: var(--body-font-size-xs);
 }
 
+/* Filter styles */
+.filters {
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--overlay-background-color);
+    border-radius: 8px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.filter-group label {
+    font-size: var(--body-font-size-xs);
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: var(--body-font-size-xs);
+    background-color: white;
+    min-width: 120px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--highlight-background-color);
+    box-shadow: 0 0 0 2px rgb(0 123 255 / 25%);
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 480px) {
+    .filters {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .filter-group {
+        flex: 1 1 100%;
+    }
+    
+    .filter-group select {
+        min-width: 100px;
+    }
+}
+
 .collapsible::after {
     content: '\02795'; /* Unicode character for "plus" sign (+) */
     font-size: 13px;

@@ -1,6 +1,113 @@
 /* eslint-disable no-console */
 import { readBlockConfig } from '../../scripts/aem.js';
 
+// URL query string management functions
+function getFilterFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return {
+    who: urlParams.get('who') || '',
+  };
+}
+
+function updateURLWithFilter(who) {
+  const url = new URL(window.location);
+  if (who) {
+    url.searchParams.set('who', who);
+  } else {
+    url.searchParams.delete('who');
+  }
+
+  // Update URL without reloading the page
+  window.history.replaceState({}, '', url);
+}
+
+function updateProgressBars(block) {
+  const objectives = block.querySelectorAll('.objective');
+
+  objectives.forEach((objectiveElement) => {
+    const { container, progressBar } = (() => {
+      const result = { container: null, progressBar: null };
+
+      let sibling = objectiveElement.nextElementSibling;
+      while (sibling && !sibling.classList.contains('objective')) {
+        if (sibling.classList.contains('container')) {
+          result.container = sibling;
+        } else if (sibling.classList.contains('progressborder')) {
+          result.progressBar = sibling.querySelector('.progressbar');
+        }
+        sibling = sibling.nextElementSibling;
+      }
+
+      return result;
+    })();
+    const visibleMetrics = container.querySelectorAll('.row:not(.header-row):not([style*="display: none"])');
+
+    if (progressBar) {
+      // Find the target from the desc element that shows "X of Y"
+      const descElement = objectiveElement.nextElementSibling.nextElementSibling;
+      const targetMatch = descElement.textContent.match(/(\d+) of (\d+)/);
+
+      if (targetMatch) {
+        const visibleCount = visibleMetrics.length;
+        const target = parseInt(targetMatch[2], 10);
+        const percent = (visibleCount * 100) / target;
+        progressBar.style.width = `${percent}%`;
+
+        // Update the count display
+        descElement.textContent = `${visibleCount} of ${target}`;
+      }
+    }
+  });
+}
+
+function applyFilters(block) {
+  const selectedWho = block.querySelector('#filter-who').value;
+
+  // Update URL with the selected filter value
+  updateURLWithFilter(selectedWho);
+
+  // Get all metric rows (excluding header rows)
+  const metricRows = block.querySelectorAll('.row:not(.header-row)');
+
+  metricRows.forEach((row) => {
+    const whoCell = row.querySelector('.item:nth-child(2)'); // Who is the 2nd column
+
+    if (whoCell) {
+      const whoValue = whoCell.textContent.trim();
+
+      let shouldShow = true;
+
+      // Apply Who filter
+      if (selectedWho && whoValue !== selectedWho) {
+        shouldShow = false;
+      }
+
+      // Show/hide the row
+      row.style.display = shouldShow ? 'flex' : 'none';
+    }
+  });
+
+  // Update progress bars based on visible metrics
+  updateProgressBars(block);
+}
+
+function createOptions(obj, value, elem, data) {
+  obj.options.length = 1;
+  data.Categories.data.forEach((element) => {
+    if (element.Objective === value) {
+      const options = document.createElement('option');
+      options.text = element[elem];
+      options.value = element[elem];
+      obj.add(options);
+    }
+  });
+  if (obj.options.length > 1) {
+    obj.classList.remove('hide');
+  } else {
+    obj.classList.add('hide');
+  }
+}
+
 /**
  * loads and decorates the footer
  * @param {Element} block The footer block element
@@ -10,10 +117,10 @@ export default async function decorate(block) {
 
   // get sheet from block config
   let sheet = cfg.source;
-  if (sheet == '') {
+  if (sheet === '') {
     sheet = '/okrs';
   }
-  
+
   block.innerHTML = '';
 
   // preview the sheet so the latest data is accessible
@@ -49,8 +156,31 @@ export default async function decorate(block) {
     // default date format yyyy-mm-dd
     const today = new Date().toISOString().split('T')[0];
 
-    if (cfg.readonly != 'true') {
-      output += `<button id='showform'>Add</button>`;
+    // Add filters at the top
+    output += `
+      <div class="filters">
+        <div class="filter-group">
+          <label for="filter-who">Who:</label>
+          <select id="filter-who" name="filter-who">
+            <option value="">Everyone</option>
+    `;
+
+    // Populate Who filter with team members
+    data.Team.data.forEach((element) => {
+      output += `<option value='${element.Name}'>${element.Name}</option>`;
+    });
+
+    output += `
+          </select>
+        </div>
+      </div>
+    `;
+
+    // Get filter values from URL and pre-select them
+    const urlFilters = getFilterFromURL();
+
+    if (cfg.readonly !== 'true') {
+      output += '<button id=\'showform\'>Add</button>';
     }
 
     output += `
@@ -95,7 +225,7 @@ export default async function decorate(block) {
         <div id='results'></div>
     `;
 
-    const objContainer = {}
+    const objContainer = {};
 
     data.Metrics.data.forEach((metric) => {
       const obj = {};
@@ -104,14 +234,18 @@ export default async function decorate(block) {
       obj.Date = metric.Date;
       obj.Summary = metric.Summary;
       obj.Notes = metric.Notes;
-      Object.hasOwn(objContainer, metric.Objective) ? objContainer[metric.Objective].push(obj) : objContainer[metric.Objective] = [];
+      if (Object.hasOwn(objContainer, metric.Objective)) {
+        objContainer[metric.Objective].push(obj);
+      } else {
+        objContainer[metric.Objective] = [];
+      }
     });
 
     data.OKRs.data.forEach((element) => {
       // prepare subset of metrics data for the current objective in the loop
       let objArray = objContainer[element.Objective];
 
-      if(!objArray){
+      if (!objArray) {
         objArray = [];
       }
 
@@ -130,61 +264,56 @@ export default async function decorate(block) {
       output += '<div class=container>';
       let headerDrawn = false;
       let i = 0;
-      objArray.sort((a, b) => {
-        return a.Date < b.Date ? -1 : 1;
-      });
+      objArray.sort((a, b) => (a.Date < b.Date ? -1 : 1));
       objArray.forEach((metric) => {
         // only draw header row once
         if (!headerDrawn) {
-          output += `<div class="row header-row">`;
+          output += '<div class=\'row header-row\'>';
           Object.keys(metric).forEach((field) => {
-            output += `<div class="header">${field}</div>`;
+            output += `<div class='header'>${field}</div>`;
           });
-          output += `</div>`;
+          output += '</div>';
           headerDrawn = true;
         }
 
         const rowClass = i % 2 === 0 ? 'even' : 'odd';
-        output += `<div class="row ${rowClass}">`;
+        output += `<div class='row ${rowClass}'>`;
 
         Object.values(metric).forEach((value, idx) => {
           if (!value) {
-            output += `<div class="item">&nbsp;</div>`;
+            output += '<div class=\'item\'>&nbsp;</div>';
             return;
           }
 
-          let raw = value.toString();
+          const raw = value.toString();
           const urlRegex = /(https?:\/\/[^\s]+)/g;
 
           // Extract URLs for later replacement and length trimming
-          const urls = raw.match(urlRegex) || [];
           const textOnly = raw.replace(urlRegex, '').trim();
 
-          // Replace URLs with "Link to Work<br>"
-          const content = raw.replace(urlRegex, (url) =>
-            `<a href="${url}" target="_blank" rel="noopener noreferrer">Link to Work</a><br>`
-          );
+          // Replace URLs with 'Link to Work<br>'
+          const content = raw.replace(urlRegex, (url) => `<a href='${url}' target='_blank' rel='noopener noreferrer'>Link to Work</a><br>`);
 
           const isLong = textOnly.length > 200 || textOnly.includes('\n');
           const safeId = `expand-${Math.random().toString(36).substring(2, 9)}-${idx}`;
 
           if (isLong) {
             output += `
-              <div class="item">
-                <div id="${safeId}" class="collapsed-text">${content}</div>
-                <button class="dots-toggle" onclick="
-                  const el = document.getElementById('${safeId}');
+              <div class='item'>
+                <div id='${safeId}' class='collapsed-text'>${content}</div>
+                <button class='dots-toggle' onclick='
+                  const el = document.getElementById("${safeId}");
                   const btn = this;
-                  const expanded = el.classList.toggle('collapsed-text');
-                  btn.textContent = expanded ? '.....' : '-collapse-';
-                ">.....</button>
+                  const expanded = el.classList.toggle("collapsed-text");
+                  btn.textContent = expanded ? "....." : "-collapse-";
+                '>.....</button>
               </div>`;
           } else {
-            output += `<div class="item">${content}</div>`;
+            output += `<div class='item'>${content}</div>`;
           }
         });
 
-        output += `</div>`;
+        output += '</div>';
         i += 1;
       });
       output += '</div>';
@@ -194,37 +323,39 @@ export default async function decorate(block) {
 
     block.innerHTML = output;
 
-    // handle form dynamic options.  added as new function in case form needs to expand.
-    function createOptions(obj, value, elem) {
-      obj.options.length = 1;
-      data.Categories.data.forEach((element) => {
-        if (element.Objective === value) {
-          var options = document.createElement('option');
-          options.value = options.text =element[elem];
-          obj.add(options);
-        }
-      });
-      (obj.options.length > 1) ? obj.classList.remove('hide') : obj.classList.add('hide'); 
-    };
+    // Pre-select filter values from URL if they exist
+    if (urlFilters.who) {
+      const whoFilter = block.querySelector('#filter-who');
+      if (whoFilter) {
+        whoFilter.value = urlFilters.who;
+        // Apply the filter immediately
+        applyFilters(block);
+      }
+    }
 
     // attach events
-    if (cfg.readonly != 'true') {
+    if (cfg.readonly !== 'true') {
       block.querySelector('#showform').addEventListener('click', () => {
         block.querySelector('#showform').classList.add('hide');
         block.querySelector('#addform').classList.remove('hide');
       });
     }
 
-    block.querySelector('#objective').addEventListener("change", function() {
-      const elem = "Category";
-      const value = this.value;
+    block.querySelector('#objective').addEventListener('change', () => {
+      const elem = 'Category';
+      const { value } = this;
       const cat = block.querySelector(`#${elem.toLowerCase()}`);
-      createOptions(cat, value, elem);
+      createOptions(cat, value, elem, data);
     });
-  
+
     block.querySelector('#cancel').addEventListener('click', () => {
       block.querySelector('#addform').classList.add('hide');
       block.querySelector('#showform').classList.remove('hide');
+    });
+
+    // Add event listener for Who filter
+    block.querySelector('#filter-who').addEventListener('change', () => {
+      applyFilters(block);
     });
 
     block.querySelector('#add').addEventListener('click', () => {
