@@ -40,6 +40,44 @@ div.section.okrs-container p {
     font-size: var(--body-font-size-xs);
 }
 
+/* Filter styles */
+.filters {
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--overlay-background-color);
+    border-radius: 8px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    font-size: var(--body-font-size-xs);
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: var(--body-font-size-xs);
+    background-color: white;
+    min-width: 150px;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--highlight-background-color);
+    box-shadow: 0 0 0 2px rgb(0 123 255 / 25%);
+}
+
 .collapsible::after {
     content: '\02795'; /* Unicode character for "plus" sign (+) */
     font-size: 13px;
